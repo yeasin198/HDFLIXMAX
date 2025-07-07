@@ -1,23 +1,24 @@
-# Don't Remove Credit @VJ_Botz
-# Subscribe YouTube Channel For Amazing Bot @Tech_VJ
-# Ask Doubt on telegram @KingVJ01
-
-import re, math, logging, secrets, mimetypes, time
-from info import *
 from aiohttp import web
+import re
+import math
+import logging
+import secrets
+import mimetypes
 from aiohttp.http_exceptions import BadStatusLine
-from TechVJ.bot import multi_clients, work_loads, TechVJBot
-from TechVJ.server.exceptions import FIleNotFound, InvalidHash
-from TechVJ import StartTime, __version__
-from TechVJ.util.custom_dl import ByteStreamer
-from TechVJ.util.time_format import get_readable_time
-from TechVJ.util.render_template import render_page
+from Jisshu.bot import multi_clients, work_loads
+from Jisshu.server.exceptions import FIleNotFound, InvalidHash
+from Jisshu.util.custom_dl import ByteStreamer
+from Jisshu.util.render_template import render_page
+from info import *
+
 
 routes = web.RouteTableDef()
 
+
 @routes.get("/", allow_head=True)
 async def root_route_handler(request):
-    return web.json_response("BenFilterBot")
+    return web.json_response("InfinityBotzz ~ EDITH")
+
 
 @routes.get(r"/watch/{path:\S+}", allow_head=True)
 async def stream_handler(request: web.Request):
@@ -30,7 +31,9 @@ async def stream_handler(request: web.Request):
         else:
             id = int(re.search(r"(\d+)(?:\/\S+)?", path).group(1))
             secure_hash = request.rel_url.query.get("hash")
-        return web.Response(text=await render_page(id, secure_hash), content_type='text/html')
+        return web.Response(
+            text=await render_page(id, secure_hash), content_type="text/html"
+        )
     except InvalidHash as e:
         raise web.HTTPForbidden(text=e.message)
     except FIleNotFound as e:
@@ -40,6 +43,7 @@ async def stream_handler(request: web.Request):
     except Exception as e:
         logging.critical(e.with_traceback(None))
         raise web.HTTPInternalServerError(text=str(e))
+
 
 @routes.get(r"/{path:\S+}", allow_head=True)
 async def stream_handler(request: web.Request):
@@ -63,14 +67,16 @@ async def stream_handler(request: web.Request):
         logging.critical(e.with_traceback(None))
         raise web.HTTPInternalServerError(text=str(e))
 
+
 class_cache = {}
+
 
 async def media_streamer(request: web.Request, id: int, secure_hash: str):
     range_header = request.headers.get("Range", 0)
-    
+
     index = min(work_loads, key=work_loads.get)
     faster_client = multi_clients[index]
-    
+
     if MULTI_CLIENT:
         logging.info(f"Client {index} is now serving {request.remote}")
 
@@ -84,11 +90,11 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
     logging.debug("before calling get_file_properties")
     file_id = await tg_connect.get_file_properties(id)
     logging.debug("after calling get_file_properties")
-    
+
     if file_id.unique_id[:6] != secure_hash:
         logging.debug(f"Invalid hash for message with ID {id}")
         raise InvalidHash
-    
+
     file_size = file_id.file_size
 
     if range_header:
@@ -146,4 +152,4 @@ async def media_streamer(request: web.Request, id: int, secure_hash: str):
             "Content-Disposition": f'{disposition}; filename="{file_name}"',
             "Accept-Ranges": "bytes",
         },
-    )
+            )
